@@ -1,0 +1,6 @@
+(this page is a wip)
+
+Preliminary analysis revealed that socioeconomic and housing factors were the dominant correlates of asthma outcomes (Mean r≈0.52), overshadowing the raw correlation between pollution and health (Mean r≈0.37).
+However, significant structural correlations were observed between Housing and Pollution (r≈0.40). 
+This confirms an Environmental Justice gradient—where disadvantaged communities face higher exposures—but the correlation is distinct enough to allow for multivariate separation. 
+This validates the need for a penalized regression approach (LASSO) to isolate the specific environmental drivers of asthma that persist after accounting for the powerful 'upstream' effects of poverty and housing quality.
