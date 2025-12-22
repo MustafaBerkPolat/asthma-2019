@@ -21,11 +21,6 @@ Information from several government agencies and non-profit organizations have b
 Additional datasets were cleaned in the initial steps but left out during the analysis.
 
 ## Findings Summary
- - While diesel particulate matter concentration has a non-negligible correlation with asthma-related hospitalization (r≈0.40) and ER visits (r≈0.32), it is not even among the top 20 predictors for either according to a LASSO model.
-Considering the documented impact air pollution has on respiratory health, this implies that other factors like demographics act as a comprehensive proxy for the cumulative environmental burden in the multivariate model, given that '% African American' and '% Hispanic' are among top predictors for both ER visits and hospitalizations
- - A lack of vehicle availability (r≈0.31) is the 4th strongest predictor for ER visits but not one of the top 20 predictors for hospitalization, signifying that the impact of a lack of car is not explainable by its association with poverty alone, and that a lack of transportation is a driver of ER usage independent of financial situation.
- - The number of single-parent households and uninsured population were collinear (r≈0.95), and the model selected the '# Single-Parent Households' feature as the number 1 predictor for both ER visits and hospitalizations. Given that our target is a rate (per 10,000) but the prediction is driven by absolute counts of single-parent households while essentially ignoring uninsured populations, we can consider population density as a very strong driver as single parents are typically much more dense in urban areas while uninsured people are more likely to be in rural areas.
- - Both ER visits and hospitalizations for asthma have high coefficients for HIV, diabetes, preventable hospital stays and injury deaths. This supports the hypothesis that the same structural failures impacting both ambulatory and emergency treatment of asthma are also impacting other medical issues, and these syndemic conditions should not be considered in isolation of one another.
 
 ## Methodology
 
@@ -51,95 +46,85 @@ All the state and county name columns were normalized into 'State' and 'County' 
 
 Before the statistical analysis, missing entries needed to be handled. As this project included datasets from numerous sources, the intersection of counties with no missing features was very limited. All the cleaned dataframes from the previous step were loaded and joined onto the dataframe containing asthma-related data, dropping counties that don't have any information for either of the asthma-related metrics. The end result was 1614 counties (or equivalent units) out of 3240 that had measurements for either ER visits or hospitalizations, 1512 counties with ER visit rate data, 1096 counties with hospitalization data, and 1037 counties with data for both at once. For the independent datasets, a simple collinearity test was performed to drop features with correlation coefficients over 0.98, resulting in a total of 47 features dropped. Most notably, 17 out of 30 features were removed from the '5yr_demographic' dataframe, and 27 out of 120 features were dropped from the 'svi_2018' dataframe.
 
-Afterwards, all the datasets were combined into a single dataframe to host the remaining 352 features. After this merging, features that were missing from at least 30% of the counties were removed, leaving 281 features. The asthma-related hospitalization and ER visit 
+Afterwards, all the datasets were combined into a single dataframe to host the remaining 352 features. After this merging, features that were missing from at least 30% of the counties were removed, leaving 281 features. The asthma-related hospitalization and ER visit were then excluded, and the remaining features were imputed using the 5 nearest neighbors (KNN) for measures that are likely to be impacted by state-level laws, and multiple imputation by chained equations (MICE) for other features. To ensure location data still influenced the MICE model, the state information was encoded into dummies, and the latitude/longitude information from the USCB's gazetteer files was used. To identify the 'hard constraint' features to fill in with KNN imputing, a function was defined to select columns containing the following keywords:
 
-In the next step, the existing features were separated into groups based on the presence of certain subwords within their headers, with the groups higher on the list taking precedence in the case a column includes subwords from multiple groups:
+ - Health policy-related features:  'medicaid', 'insurance', 'enrollment', 'medicare'
+ - Fiscal policy-related features:  'tax', 'spending', 'funding'
+ - Education-related features:      'graduation", 'proficiency', 'score', 'college', 'education'
+ - Legal/Reporting standards:       'crime', 'arrest'
 
- - 'Asthma':         ['asthma']
- - 'Pollution':      ['pollutant', 'pollution']
- - 'Care Provider':  ['respiratory therapist', 'm.d.', 'physician', 'hospital']
- - 'Insurance':      ['insur', 'coverage', 'medicaid', 'private', 'medicare']
- - 'Other Health':   ['physical', 'smok', 'disability', 'disabl', 'medical', 'mental', 
-                       'activity', 'hiv', 'diabet', 'food', 'nutrition', 'injury', 
-                       'mortality', 'obese', 'life expectancy', 'birthweight']
 
- - 'Socioeconomic':  ['income', 'poverty', 'unemployment', 'education', 'socioeconomic', 
-                       'minority', 'demographic', 'crime', 'college', 'education', 'social', 
-                       'alone', 'single']
- - 'Housing':        ['rent', 'value', 'owner', 'vacant', 'crowd', 'hous']
+In the next step, the existing features were separated into groups based on the presence of certain subwords within their headers, with the groups higher on the list taking precedence in the case a column includes subwords from multiple groups. This was done for better readability and did not directly impact the analysis.
+
+ - 'Asthma':         'asthma'
+ - 'Pollution':      'pollutant', 'pollution'
+ - 'Care Provider':  'respiratory therapist', 'm.d.', 'physician', 'hospital'
+ - 'Insurance':      'insur', 'coverage', 'medicaid', 'private', 'medicare']
+ - 'Other Health':   'physical', 'smok', 'disability', 'disabl', 'medical', 'mental', 
+                     'activity', 'hiv', 'diabet', 'food', 'nutrition', 'injury', 
+                     'mortality', 'obese', 'life expectancy', 'birthweight'
+ - 'Socioeconomic':  'income', 'poverty', 'unemployment', 'education', 'socioeconomic', 
+                     'minority', 'demographic', 'crime', 'college', 'education', 'social', 
+                     'alone', 'single'
+ - 'Housing':        'rent', 'value', 'owner', 'vacant', 'crowd', 'hous'
 
 ### Statistical Analysis
 
-The 'Asthma' category's features only included the hospitalization and ER visit rates, and their correlation coefficients to the entries in the other categories were then calculated. Using the scikit-learn and statsmodel Python packages, the LASSO model was used to select statistically relevant features from the other categories, leaving us with 82 features out of 324 for ER visit rates and 117 features for hospitalization rates. For these features, the variance inflation factors and p-values were calculated to spot significant relationships. The results that have a p-value less than 0.05 and a variance inflation factor less than 5 in the order of highest absolute OLS coefficient are as follows, with the full tables available under the project files.
+The 'Asthma' category's features only included the hospitalization and ER visit rates, and their correlation coefficients to the entries in the other categories were then calculated. Using the scikit-learn and statsmodel Python packages, the LASSO model was used to select statistically relevant features from the other categories, leaving us with 84 features for ER visit rates and 33 features for hospitalization rates. For these features, the variance inflation factors and p-values were calculated to spot significant relationships. The results that have a p-value less than 0.05 and a variance inflation factor less than 10 in the order of highest absolute OLS coefficient are as follows, with the full tables available under the project files.
 
-### Age-adjusted ER Visit Rate for Asthma per 10,000 People (Adjusted R^2: 0.8050)
-| Feature                                                                                                                                                    |   LASSO_Coef |   OLS_Coef |     P_Value |     VIF |   Correlation |
-|:-----------------------------------------------------------------------------------------------------------------------------------------------------------|-------------:|-----------:|------------:|--------:|--------------:|
-| Preventable hospital stays => Preventable Hosp. Rate                                                                                                       |     1.87994  |   1.9792   | 8.49257e-20 | 2.22355 |    0.249675   |
-| PRIVATE INSURANCE ALONE OR IN COMBINATION => 75 years and over                                                                                             |    -1.69729  |  -1.96155  | 7.33662e-10 | 4.81136 |   -0.232277   |
-| Sexually transmitted infections => Chlamydia Rate                                                                                                          |     1.71715  |   1.62456  | 1.27759e-07 | 4.49399 |    0.477599   |
-| Violent crime => Violent Crime Rate                                                                                                                        |     1.76492  |   1.57849  | 5.39001e-11 | 2.744   |    0.556272   |
-| (Socioeconomic) Flag - the percentage of persons with no high school diploma is in the 90th percentile (1 = yes, 0 = no) [F_NOHSDP]                        |    -1.49166  |  -1.47707  | 4.14607e-11 | 2.37418 |    0.0919456  |
-| Access to exercise opportunities => % With Access                                                                                                          |     1.28918  |   1.34684  | 1.35739e-08 | 2.67047 |    0.107066   |
-| (Minority Status/Language) Minority (all persons except white, non- Hispanic) estimate MOE, 2014-2018 ACS [M_MINRTY]                                       |     0.966357 |   1.24388  | 9.53123e-05 | 4.83739 |    0.174528   |
-| COVERAGE ALONE => Public insurance alone => VA care coverage alone                                                                                         |     1.05202  |   1.22624  | 3.12844e-08 | 2.33145 |    0.0912883  |
-| Driving alone to work => % Drive Alone                                                                                                                     |    -0.911848 |  -1.08811  | 0.000650798 | 4.85171 |    0.106046   |
-| COVERAGE ALONE OR IN COMBINATION => Tricare/military  insurance alone or in combination => 65 years and over                                               |     0.898198 |   1.03194  | 0.000145506 | 3.51393 |    0.154172   |
-| Alcohol-impaired driving deaths => % Alcohol-Impaired                                                                                                      |     0.96069  |   0.986121 | 3.53244e-08 | 1.51952 |   -0.0398717  |
-| State_Louisiana                                                                                                                                            |    -0.879902 |  -0.964721 | 2.12959e-05 | 2.45089 |    0.0626951  |
-| State_Pennsylvania                                                                                                                                         |    -0.722121 |  -0.920103 | 0.000118374 | 2.72005 |   -0.0153704  |
-| (Household Composition/Disability) Persons aged 17 and younger estimate MOE, 2014-2018 ACS 2018 DESCRIPTION [M_AGE17]                                      |     0.889966 |   0.907527 | 1.18282e-05 | 2.04182 |   -0.00891377 |
-| (Housing Type/Transportation) Flag - the percentage of persons in institutionalize d group quarters is in the 90th percentile (1 = yes, 0 = no) [F_GROUPQ] |    -0.811804 |  -0.905184 | 5.90741e-05 | 2.41765 |    0.0280724  |
-| (Household Composition/Disability) Flag - the percentage of single parent households is in the 90th percentile (1 = yes, 0 = no) [F_SNGPNT]                |    -0.749364 |  -0.86093  | 3.02798e-05 | 2.02723 |    0.315055   |
-| Mental health providers => MHP Rate                                                                                                                        |     0.796397 |   0.860568 | 0.000336045 | 2.74312 |    0.160688   |
-| State_Massachusetts                                                                                                                                        |     0.798787 |   0.847273 | 0.000613352 | 2.91402 |    0.0948835  |
-| Value_Pollutant: 1,3-butadiene                                                                                                                             |     0.655424 |   0.830892 | 0.0021124   | 3.48167 |    0.28306    |
-| Dentists => Dentist Rate                                                                                                                                   |     0.717809 |   0.771332 | 0.000533652 | 2.36276 |    0.0923008  |
-| COVERAGE ALONE OR IN COMBINATION => VA care coverage alone or in combination => 19 to 64 years                                                             |    -0.480732 |  -0.758709 | 0.0104607   | 4.18696 |    0.0565713  |
-| Children in poverty => % Children in Poverty (Hispanic)                                                                                                    |    -0.699719 |  -0.708353 | 0.000138725 | 1.64543 |    0.0959516  |
-| Mammography screening => % Screened                                                                                                                        |    -0.531215 |  -0.633916 | 0.0107746   | 2.94655 |   -0.0832824  |
-| State_Indiana                                                                                                                                              |    -0.275674 |  -0.629318 | 0.010878    | 2.91157 |   -0.0514016  |
-| Median household income => Household income (Hispanic)                                                                                                     |     0.585516 |   0.579817 | 0.00446058  | 1.98168 |   -0.0998618  |
-| COVERAGE ALONE OR IN COMBINATION => Tricare/military  insurance alone or in combination => Under 19                                                        |    -0.477471 |  -0.559946 | 0.0288132   | 3.12903 |    0.0387631  |
-| (Household Composition/Disability) Persons aged 65 and older estimate MOE, 2014-2018 ACS [M_AGE65]                                                         |    -0.529398 |  -0.542558 | 0.00903095  | 2.05874 |    0.0459065  |
-| COVERAGE ALONE OR IN COMBINATION => Medicare coverage alone or in combination => Under 19                                                                  |     0.526832 |   0.495417 | 0.00190453  | 1.21331 |    0.108122   |
-| COVERAGE ALONE OR IN COMBINATION => VA care coverage alone or in combination => Under 19                                                                   |    -0.410789 |  -0.443356 | 0.00594518  | 1.23828 |    0.0640911  |
-| (Socioeconomic) Percentage of persons below poverty estimate [EP_POV]                                                                                      |     0.228453 |   0.338012 | 0.0390092   | 1.27901 |    0.113229   |
-| Value_Pollutant: Ethylene oxide                                                                                                                            |    -0.274024 |  -0.295554 | 0.0465764   | 1.05196 |    0.00454559 |
+### Age-adjusted ER Visit Rate for Asthma per 10,000 People (Adjusted R^2: 0.6119)
+| Feature                                                                                                                                       |   LASSO_Coef |   OLS_Coef |     P_Value |     VIF |   Correlation |
+|:----------------------------------------------------------------------------------------------------------------------------------------------|-------------:|-----------:|------------:|--------:|--------------:|
+| Demographics => % African American                                                                                                            |     5.90676  |    6.44776 | 2.63354e-10 | 9.8834  |    0.535384   |
+| (Household Composition/Disability) Percentage of persons aged 17 and younger estimate MOE, 2014-2018 ACS 2018 DESCRIPTION [MP_AGE17]          |    -2.4505   |   -3.33509 | 8.04519e-10 | 2.7991  |   -0.189799   |
+| Median household income => Household Income                                                                                                   |    -2.02355  |   -3.12503 | 0.000780164 | 8.2956  |   -0.139338   |
+| (Minority Status/Language) Sum of series for Minority Status/Languag e theme 2018 DESCRIPTION [SPL_THEME3]                                    |     1.90788  |    2.76183 | 0.000305527 | 5.60696 |    0.37892    |
+| State_Minnesota                                                                                                                               |    -2.38082  |   -2.71481 | 1.07588e-08 | 2.14499 |   -0.19243    |
+| State_Louisiana                                                                                                                               |    -1.96681  |   -2.61201 | 5.23214e-06 | 3.14218 |    0.096494   |
+| Adult smoking => % Smokers                                                                                                                    |    -0.754752 |   -2.54452 | 0.00413137  | 7.55587 |    0.102209   |
+| (Housing Type/Transportation) Percentage of households with no vehicle available estimate [EP_NOVEH]                                          |     2.60984  |    2.43749 | 0.014284    | 9.50809 |    0.446558   |
+| Income inequality => Income Ratio                                                                                                             |    -1.48467  |   -2.31058 | 0.000100059 | 3.37758 |    0.331754   |
+| HIV prevalence => HIV Prevalence Rate                                                                                                         |     2.27494  |    2.16356 | 0.000956432 | 4.11452 |    0.505187   |
+| Life expectancy => Life Expectancy                                                                                                            |    -1.85157  |   -2.07568 | 0.0103676   | 6.29773 |   -0.190377   |
+| Respiratory Therapist per 100,000 population                                                                                                  |    -1.6477   |   -2.05366 | 0.0113006   | 6.3123  |   -0.151788   |
+| Diabetes prevalence => % Diabetic                                                                                                             |     1.28199  |    1.9061  | 0.0145906   | 5.85095 |    0.198298   |
+| Preventable hospital stays => Preventable Hosp. Rate                                                                                          |     1.31347  |    1.86509 | 0.000115463 | 2.24094 |    0.139559   |
+| (General) Adjunct variable - Percentage uninsured in the total civilian noninstitutiona lized population estimate, 2014-2018 ACS [EP_UNINSUR] |    -1.34342  |   -1.84844 | 0.00407513  | 3.9753  |    0.112138   |
+| COVERAGE ALONE OR IN COMBINATION => Direct-purchase insurance alone or in combination => Under 19                                             |     0.903447 |    1.82829 | 3.81765e-05 | 1.88605 |   -0.137047   |
+| State_Massachusetts                                                                                                                           |     1.39833  |    1.76276 | 0.000152525 | 2.07538 |    0.132306   |
+| Demographics => % Asian                                                                                                                       |    -0.382022 |   -1.72872 | 0.0186167   | 5.18545 |    0.139659   |
+| Demographics => % Rural                                                                                                                       |    -0.752655 |   -1.6622  | 0.019406    | 4.85793 |   -0.291233   |
+| (Socioeconomic) Flag - the percentage of persons with no high school diploma is in the 90th percentile (1 = yes, 0 = no) [F_NOHSDP]           |    -1.2424   |   -1.63455 | 0.000224196 | 1.87985 |    0.0250259  |
+| Severe housing problems => Severe Housing Cost Burden                                                                                         |     1.84187  |    1.62508 | 0.00806945  | 3.6136  |    0.436264   |
+| Sexually transmitted infections => Chlamydia Rate                                                                                             |     0.679995 |    1.59526 | 0.0127393   | 3.93956 |    0.481205   |
+| State_Maine                                                                                                                                   |     1.04709  |    1.5238  | 0.000164818 | 1.56686 |    0.0305938  |
+| (Housing Type/Transportation) Sum of series for Housing Type/ Transportation theme [SPL_THEME4]                                               |    -0.944056 |   -1.47672 | 0.0479158   | 5.35759 |    0.32746    |
+| (Household Composition/Disability) Persons aged 17 and younger estimate MOE, 2014-2018 ACS 2018 DESCRIPTION [M_AGE17]                         |     0.796432 |    1.36216 | 0.000346239 | 1.38897 |    0.0366445  |
+| PRIVATE INSURANCE ALONE OR IN COMBINATION => 75 years and over                                                                                |    -0.158058 |   -1.17788 | 0.0185716   | 2.40552 |   -0.242517   |
+| Violent crime => Violent Crime Rate                                                                                                           |     1.85719  |    1.16772 | 0.0295568   | 2.7677  |    0.534609   |
+| State_Connecticut                                                                                                                             |     0.510531 |    0.80066 | 0.0306032   | 1.31785 |    0.0497299  |
+| State_New Hampshire                                                                                                                           |     0.31981  |    0.79839 | 0.0328034   | 1.34469 |    0.00417388 |
 
 
-### Age-adjusted Hospitalization Rate for Asthma per 10,000 People (Adjusted R^2: 0.7592)
-| Feature                                                                                                                             |   LASSO_Coef |   OLS_Coef |      P_Value |     VIF |   Correlation |
-|:------------------------------------------------------------------------------------------------------------------------------------|-------------:|-----------:|-------------:|--------:|--------------:|
-| Preventable hospital stays => Preventable Hosp. Rate                                                                                |    0.72587   |  0.743038  | 2.77885e-117 | 2.30075 |    0.342679   |
-| High school graduation => Graduation Rate                                                                                           |   -0.237376  | -0.242681  | 2.78427e-16  | 2.1026  |   -0.19966    |
-| Children in poverty => % Children in Poverty (Hispanic)                                                                             |   -0.237203  | -0.23544   | 8.58103e-19  | 1.68757 |   -0.0215559  |
-| Median household income => Household income (Hispanic)                                                                              |    0.22887   |  0.230567  | 1.3493e-15   | 1.99142 |    0.00676522 |
-| Limited access to healthy foods => % Limited Access                                                                                 |   -0.211594  | -0.211156  | 6.37452e-12  | 2.26487 |   -0.200312   |
-| Primary care physicians => PCP Rate                                                                                                 |    0.213646  |  0.210171  | 2.41903e-09  | 2.98117 |    0.136764   |
-| Violent crime => Violent Crime Rate                                                                                                 |    0.193099  |  0.197987  | 4.63191e-08  | 3.15686 |    0.407148   |
-| (Socioeconomic) Flag - the percentage of persons with no high school diploma is in the 90th percentile (1 = yes, 0 = no) [F_NOHSDP] |    0.173304  |  0.183257  | 1.56914e-06  | 3.50656 |    0.171145   |
-| Children in poverty => % Children in Poverty (White)                                                                                |    0.136546  |  0.157353  | 0.000116386  | 4.02025 |    0.159731   |
-| COVERAGE ALONE OR IN COMBINATION => Medicare coverage alone or in combination => Under 19                                           |    0.162707  |  0.156573  | 1.85634e-10  | 1.44924 |    0.136931   |
-| State_Minnesota                                                                                                                     |   -0.138095  | -0.145058  | 4.09075e-05  | 3.01389 |   -0.146096   |
-| COVERAGE ALONE OR IN COMBINATION => Tricare/military  insurance alone or in combination => 65 years and over                        |   -0.135146  | -0.136287  | 0.00173269   | 4.56785 |    0.0567122  |
-| Alcohol-impaired driving deaths => % Alcohol-Impaired                                                                               |    0.129505  |  0.121332  | 7.2803e-07   | 1.44417 |   -0.0470957  |
-| (Housing Type/Transportation) Percentage of persons in group quarters estimate MOE, 2014-2018 ACS [MP_GROUPQ]                       |   -0.127137  | -0.118942  | 0.00246223   | 3.72415 |   -0.181013   |
-| (Household Composition/Disability) Persons aged 65 and older estimate MOE, 2014-2018 ACS [M_AGE65]                                  |   -0.112792  | -0.117894  | 0.000601094  | 2.84823 |    0.105153   |
-| (Minority Status/Language) Flag - the percentage those with limited English is in the 90th percentile (1 = yes, 0 = no) [F_LIMENG]  |    0.102736  |  0.110817  | 0.00468619   | 3.70714 |    0.159269   |
-| Residential segregation - non-white/white => Segregation Index                                                                      |    0.098804  |  0.106782  | 0.000279327  | 2.0828  |    0.234399   |
-| State_Massachusetts                                                                                                                 |    0.10183   |  0.102512  | 0.000325227  | 1.96199 |    0.0955795  |
-| State_New Jersey                                                                                                                    |    0.0929166 |  0.0974425 | 0.000219192  | 1.67651 |    0.117657   |
-| State_Missouri                                                                                                                      |    0.0989211 |  0.0949383 | 0.00426497   | 2.66395 |    0.0338618  |
-| (Household Composition/Disability) Persons aged 17 and younger estimate MOE, 2014-2018 ACS 2018 DESCRIPTION [M_AGE17]               |    0.0820301 |  0.0947508 | 0.00150317   | 2.15041 |    0.0231698  |
-| Access to exercise opportunities => % With Access                                                                                   |    0.0888632 |  0.0902469 | 0.00701388   | 2.70495 |    0.173351   |
-| State_Louisiana                                                                                                                     |   -0.0804274 | -0.075448  | 0.0198757    | 2.53514 |    0.0104082  |
-| Flu vaccinations => % Vaccinated (White)                                                                                            |    0.0747427 |  0.0740295 | 0.02297      | 2.55977 |    0.150881   |
-| State_Rhode Island                                                                                                                  |    0.0608147 |  0.0614525 | 0.0061775    | 1.21597 |    0.0398706  |
-| State_Maryland                                                                                                                      |   -0.0639126 | -0.0585103 | 0.0170037    | 1.45145 |    0.0303318  |
-| State_Connecticut                                                                                                                   |    0.0539108 |  0.0576596 | 0.044355     | 1.98641 |    0.00528584 |
-| State_South Carolina                                                                                                                |    0.0557342 |  0.0563888 | 0.0338543    | 1.70597 |    0.0890446  |
-| COVERAGE ALONE OR IN COMBINATION => VA care coverage alone or in combination => Under 19                                            |   -0.0466549 | -0.0482044 | 0.0345087    | 1.25582 |    0.0234763  |
+
+### Age-adjusted Hospitalization Rate for Asthma per 10,000 People (Adjusted R^2: 0.4524)
+Age-adjusted Hospitalization Rate for Asthma per 10,000 People
+| Feature                                                                                                                              |   LASSO_Coef |   OLS_Coef |     P_Value |     VIF |   Correlation |
+|:-------------------------------------------------------------------------------------------------------------------------------------|-------------:|-----------:|------------:|--------:|--------------:|
+| Preventable hospital stays => Preventable Hosp. Rate                                                                                 |   0.414381   |   0.698902 | 8.18192e-14 | 1.88486 |     0.260849  |
+| (Housing Type/Transportation) Percentage of households with no vehicle available estimate [EP_NOVEH]                                 |   0.405751   |   0.429827 | 6.65743e-05 | 2.54688 |     0.443441  |
+| HIV prevalence => HIV Prevalence Rate                                                                                                |   0.277306   |   0.392329 | 0.000556275 | 2.83749 |     0.397855  |
+| State_Minnesota                                                                                                                      |  -0.180774   |  -0.383435 | 1.75469e-05 | 1.74628 |    -0.173672  |
+| Low birthweight => % LBW                                                                                                             |   0.0575854  |   0.377329 | 0.000279213 | 2.3672  |     0.237626  |
+| Demographics => % Hispanic                                                                                                           |   0.116947   |   0.364335 | 0.00109852  | 2.73878 |     0.19989   |
+| High school graduation => Graduation Rate                                                                                            |  -0.139905   |  -0.357852 | 5.16687e-05 | 1.71323 |    -0.260989  |
+| State_Louisiana                                                                                                                      |  -0.0753505  |  -0.336887 | 1.70854e-05 | 1.3443  |     0.0217947 |
+| State_Missouri                                                                                                                       |   0.0844992  |   0.327821 | 1.27995e-05 | 1.23577 |     0.0620509 |
+| (Household Composition/Disability) Percentage of persons aged 17 and younger estimate MOE, 2014-2018 ACS 2018 DESCRIPTION [MP_AGE17] |  -0.175764   |  -0.299598 | 0.0378399   | 4.58913 |    -0.259582  |
+| State_Kansas                                                                                                                         |   0.046385   |   0.292928 | 0.000278124 | 1.42586 |    -0.0221605 |
+| COVERAGE ALONE OR IN COMBINATION => Employer-based insurance alone or in combination => 65 years and over                            |   0.0569604  |   0.216616 | 0.0246332   | 2.04802 |     0.232214  |
+| Longitude                                                                                                                            |   0.0904691  |   0.20663  | 0.0385557   | 2.19921 |     0.225974  |
+| State_Massachusetts                                                                                                                  |   0.00226196 |   0.143528 | 0.044201    | 1.12188 |     0.114854  |
 
 
 The full tables for these scores and the correlation values is available in the files.
