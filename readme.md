@@ -12,18 +12,15 @@ This research project serves to investigate the connections between socioeconomi
 Information from several government agencies and non-profit organizations have been used during this project:
  - [American Community Survey (ACS)](https://www.census.gov/programs-surveys/acs.html)'s 5 year estimate private and public health insurance coverage and estimate population by age, gender and dependency per county 
 (codes ACSST5Y2019.S2703, ACSST5Y2019.S2704 and ACSST5Y2019.S0101)
- - [Environmental Protection Agency (EPA)](https://www.epa.gov/)'s national-scale air toxic assesments (051646 on the [EPH](https://ephtracking.cdc.gov/) system)
+ - [Environmental Protection Agency (EPA)](https://www.epa.gov/)'s national-scale air toxic assesments (051646 on the [EPH](https://ephtracking.cdc.gov/DataExplorer/?c=11&i=81&m=-1) system)
  - [Centers for Disease Control and Prevention (CDC)](https://www.cdc.gov/index.html)'s age-adjusted ER visits and hospitalizations for asthma per 10,000 population (051823 and 053054 respectively on the EPH system)
- - [HRSA Data Warehouse](data.HRSA.gov)'s active medical doctor and respiratory therapist estimations per state, from AMA Physician Professional Data 2019
+ - [HRSA Data Warehouse](https://data.hrsa.gov/topics/health-workforce/nchwa/ahrf)'s active medical doctor and respiratory therapist estimations per state, from AMA Physician Professional Data 2019
  - [County Health Rankings & Roadmaps](https://www.countyhealthrankings.org/reports/2019-county-health-rankings-key-findings-report)' 2019 County Health Rankings dataset's 'Ranked Measure Data' and 'Additional Measure Data' tabs
  - [Agency for Toxic Substances and Disease Registry (ATSDR)](https://www.atsdr.cdc.gov/place-health/index.html)'s CDC Social Vulnerability Index for 2018
  - [United States Census Bureau](https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html)'s census tracts for latitude and longitude information
 Additional datasets were cleaned in the initial steps but left out during the analysis.
 
 ## Findings Summary
-
- -
-
  - While diesel particulate matter concentration has a non-negligible correlation with asthma-related hospitalization (r≈0.40) and ER visits (r≈0.32), it is not even among the top 20 predictors for either according to a LASSO model.
 Considering the documented impact air pollution has on respiratory health, this implies that other factors like demographics act as a comprehensive proxy for the cumulative environmental burden in the multivariate model, given that '% African American' and '% Hispanic' are among top predictors for both ER visits and hospitalizations
  - A lack of vehicle availability (r≈0.31) is the 4th strongest predictor for ER visits but not one of the top 20 predictors for hospitalization, signifying that the impact of a lack of car is not explainable by its association with poverty alone, and that a lack of transportation is a driver of ER usage independent of financial situation.
@@ -34,11 +31,27 @@ Considering the documented impact air pollution has on respiratory health, this 
 
 ### Data Cleaning and Merging
 
-The different datasets used in this project follow different formatting schemes, so the first step was to clean the data and standardize the format. All the datasets' names were initially manually parsed and renamed for clarity, then loaded into a dictionary of Polars dataframes in Python for the processing. All the state and county name columns were normalized into 'State' and 'County' respectively, with the capitalization set to title case, and any trailing phrases like ' County' were removed from county names for unification purposes. To avoid issues with duplicate county names like 'Orange County', another column was created to host the combined 'County (State)' name. Several of these datasets utilized code phrases as the headers for the columns, and these headers had to be re-assigned using the tables included either along the datasets themselves or the dictionary tables stored in the supplementary documentation by extracting them via pdfplumber. The processed dataframes were then saved into a separate folder as separate files, with the dataframe storing asthma-related hospitalization and ER visits combined into a target dataframe.
+The different datasets used in this project follow different formatting schemes, so the first step was to clean the data and standardize the format. All the datasets' names were initially manually parsed and renamed for clarity, then loaded into a dictionary of Polars dataframes in Python for the processing. The used datasets as they were downloaded and the names given to them are as follows:
+ - 2025_Gaz_counties_national -> 'lat_long', to serve as the geographical position data for the imputing of missing measurements later on
+ - 5 Year estimate population by age, gender and dependency per county (ACSST5Y2019.S0101) -> '5yr_demographic', for detailed population estimates
+ - 5 Year estimate public health insurance coverage (ACSST5Y2019.S2704) ->'5yr_public_insurance', for public insurance coverage data
+ - 5 Year estimate private health insurance coverage (ACSST5Y2019.S2703) -> '5yr_private_insurance', for private insurance coverage data
+(the 5-year estimates were used for the above 3 measures to improve reliability and coverage for small/urban counties)
+ - Pollutant per county (_051646) -> 'pollution', to track the micrograms of air pollutants per cubic meter
+ - Asthma hospitalizations (_053054) -> 'asthma_hospitalization'
+ - Emergency asthma visits (_051823) -> 'emergency_asthma'
+The emergency asthma visit and asthma hospitalization dataframes were combined into one before saving
+ - 'Medical doctors per state' and 'Respiratory therapists per state' -> 'md_per_state' and 'resp_therapist_per_state'
+ - 2019 County Health Rankings Data - v3 -> two separate dataframes; 'county_health_measures' to store directly health-related data like infant mortality rates and HIV prevalence, and 'county_additional_measures' to store other information like homicides and disconnected youth. These dataframes went through an additional step of cleaning afterwards since they included overlapping information
+ - svi 2018 -> 'svi_2018'
+
+All the state and county name columns were normalized into 'State' and 'County' respectively, with the capitalization set to title case, and any trailing phrases like ' County', ' Parish' and ' Borough' were standardized into ' County' for unification purposes. A general-purpose function was defined to catch the 'duplicate' county entries for Virgninian independent cities to ensure that they were appropriately suffixed with ' City' when referring to independent cities and ' County' otherwise, to ensure that upon merging the datasets the available information was appropriately assigned to the correct census units. To avoid issues with duplicate county names like 'Orange County', another column was created to host the combined 'County (State)' name. Several of these datasets utilized code phrases as the headers for the columns, and these headers had to be re-assigned using the tables included either along the datasets themselves or the dictionary tables stored in the supplementary documentation by extracting them via pdfplumber. The processed dataframes were then saved into a separate folder as separate files, with the dataframe storing asthma-related hospitalization and ER visits combined into a target dataframe.
 
 ### Data Pre-processing
 
-Before the statistical analysis, missing entries needed to be handled. As this project included datasets from numerous sources, the intersection of counties with no missing features was very limited. All the cleaned dataframes from the previous step were loaded and joined onto the dataframe containing asthma-related data, dropping counties that don't have any information for either of the asthma-related metrics. The end result was 1614 counties out of 3144 that had measurements for either ER visits or hospitalizations, 1512 counties with ER visit rate data, 1096 counties with hospitalization data, and 1037 counties with data for both at once. For these 1614 counties, 368 numeric features excluding the asthma-related mesaurements existed. From these 368 entries, the features where at least 30% of the counties were missing data were dropped, leaving 324 features. The remaining features were filled using spatial imputation where feasible, and MICE where it wasn't (like counties where their neighbors were also missing these features). 
+Before the statistical analysis, missing entries needed to be handled. As this project included datasets from numerous sources, the intersection of counties with no missing features was very limited. All the cleaned dataframes from the previous step were loaded and joined onto the dataframe containing asthma-related data, dropping counties that don't have any information for either of the asthma-related metrics. The end result was 1614 counties (or equivalent units) out of 3240 that had measurements for either ER visits or hospitalizations, 1512 counties with ER visit rate data, 1096 counties with hospitalization data, and 1037 counties with data for both at once. For the independent datasets, a simple collinearity test was performed to drop features with correlation coefficients over 0.98, resulting in a total of 47 features dropped. Most notably, 17 out of 30 features were removed from the '5yr_demographic' dataframe, and 27 out of 120 features were dropped from the 'svi_2018' dataframe.
+
+Afterwards, all the datasets were combined into a single dataframe to host the remaining 352 features. After this merging, features that were missing from at least 30% of the counties were removed, leaving 281 features. The asthma-related hospitalization and ER visit 
 
 In the next step, the existing features were separated into groups based on the presence of certain subwords within their headers, with the groups higher on the list taking precedence in the case a column includes subwords from multiple groups:
 
@@ -59,7 +72,7 @@ In the next step, the existing features were separated into groups based on the 
 
 The 'Asthma' category's features only included the hospitalization and ER visit rates, and their correlation coefficients to the entries in the other categories were then calculated. Using the scikit-learn and statsmodel Python packages, the LASSO model was used to select statistically relevant features from the other categories, leaving us with 82 features out of 324 for ER visit rates and 117 features for hospitalization rates. For these features, the variance inflation factors and p-values were calculated to spot significant relationships. The results that have a p-value less than 0.05 and a variance inflation factor less than 5 in the order of highest absolute OLS coefficient are as follows, with the full tables available under the project files.
 
-### Age-adjusted ER Visit Rate for Asthma per 10,000 People (Adjusted R^2: 0.6300)
+### Age-adjusted ER Visit Rate for Asthma per 10,000 People (Adjusted R^2: 0.8050)
 | Feature                                                                                                                                                    |   LASSO_Coef |   OLS_Coef |     P_Value |     VIF |   Correlation |
 |:-----------------------------------------------------------------------------------------------------------------------------------------------------------|-------------:|-----------:|------------:|--------:|--------------:|
 | Preventable hospital stays => Preventable Hosp. Rate                                                                                                       |     1.87994  |   1.9792   | 8.49257e-20 | 2.22355 |    0.249675   |
@@ -95,7 +108,7 @@ The 'Asthma' category's features only included the hospitalization and ER visit 
 | Value_Pollutant: Ethylene oxide                                                                                                                            |    -0.274024 |  -0.295554 | 0.0465764   | 1.05196 |    0.00454559 |
 
 
-### Age-adjusted Hospitalization Rate for Asthma per 10,000 People (Adjusted R^2: 0.6058)
+### Age-adjusted Hospitalization Rate for Asthma per 10,000 People (Adjusted R^2: 0.7592)
 | Feature                                                                                                                             |   LASSO_Coef |   OLS_Coef |      P_Value |     VIF |   Correlation |
 |:------------------------------------------------------------------------------------------------------------------------------------|-------------:|-----------:|-------------:|--------:|--------------:|
 | Preventable hospital stays => Preventable Hosp. Rate                                                                                |    0.72587   |  0.743038  | 2.77885e-117 | 2.30075 |    0.342679   |
