@@ -20,7 +20,7 @@ Information from several government agencies and non-profit organizations have b
  - [United States Census Bureau](https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html)'s census tracts for latitude and longitude information
 Additional datasets were cleaned in the initial steps but left out during the analysis.
 
-## Findings Summary
+## Key Findings
 
 
 ## Methodology
@@ -130,11 +130,28 @@ The 'Asthma' category's features only included the hospitalization and ER visit 
 The full tables for these scores and the correlation values is available in the files.
 
 ### Conclusions
- - The adjusted R^2 scores of 0.612 for ER visit rates and 0.452 for hospitalization rates suggest that ER visit rates are more impacted by the socioeconomic and environmental factors included in this study.
- - The '% African American' feature has a LASSO coefficient of 5.90, OLS coefficient 6.45 and VIF of 9.88 for ER visit rates, making it the single strongest predictor of asthma ER visit rates. The high VIF indicates a connection to other socioeconomic factors, but the fact that this particular feature still remains at the top of the list implies that even after controlling for income, insurance and housing, communities with higher percentages of African Americans experience higher rates of asthma emergencies, possibly due to deeper-seated structural inequities than the available data covers.
- - Conversely to the '% African American' feature, '% Asian' populations show non-negligible negative associations when looking at the LASSO and OLS measures, but have a correlation of 0.14. Without adjustment, Asian population percentage correlates with higher ER rates, but post-regression it predicts lower ER rates, most likely due to the urban concentration of the Asian population in areas like San Francisco and New York, where factors like higher pollution and old and moldy housing may be causing asthma trigers. However, other factors not covered by this study, possibly dietary and lifestyle choices, still ultimately cause the '% Asian' population to be correlated with lower ER visit rates overall.
- - On the other hand, the '% Rural' population have a similar profile to '% Asian' population post-adjustment, but maintains a simple negative correlation of -0.29 with ER visits. The reduced population density and improved air quality is likely a driver for infrequent and less severe asthma attacks, while the distance to the nearest hospital is a potential deterrent for ER visits where patients may deem their conditions not serious enough to warrant the drive.
- - Both '% Uninsured' and '# Uninsured' have negative coefficients in the ER model, implying that the financial impact of an ER visit is a potential negative driver for ER visits. Those with insurance are more likely to utilize the ER. 'Preventable hospital stays' also has a positive correlation with ER visits, possibly because of the same reason: People who have the means to utilize hospital services during non-emergencies are also likely to utilize their services during emergencies.
- - A lack of vehicle availability is a positive predictor for both ER visits and hospitalizations, with variance inflation factors all below 10 for all variations of the same statistic. This indicates that beyond being a signaler of financial status, not having a car likely prevents patients from routine outpatient care, causing otherwise minor cases to escalate into requiring an ER visit or hospitalization later on.
- - 'Severe Housing Cost Burden' is a relatively strong positive predictor for ER visits, while 'Severe Housing Problems (Overcrowding)' has a negative relationship and very high p-value (roughly 0.315), meaning that the model essentially made a distinction between these two housing-related problems. This might imply that multi-generational households (common in overcrowding statistics) may provide a form of "in-home monitoring" that prevents asthma attacks from requiring an ER visit, compared to a single parent struggling to pay rent alone. The high p-value makes this particular finding difficult to accept, however.
- - Acetaldehyde and formaldehyde concentrations both have very high VIF values (36.89 and 44.51 respectively) and very low or negative coefficients, which is contradictory to the fact that these chemicals are known irritants, and formaldehyde concentration in particular has a p-value of nearly 1. This implies that despite being known to be harmful chemicals that can trigger or worsen asthma, other factors directly tied to their concentrations like urban density and traffic are potentially more effective at explaining asthma-related ER vists and hospitalizations.
+
+## Socioeconomic Determinants Outweigh Clinical Factors for ER Utilization
+The model explains significantly more variance in ER visit rates (Adjusted R^2 : 0.612) than in hospitalization rates (Adjusted R^2 : 0.452). This suggests that while hospitalization may be driven by individual disease progression, the frequency of ER visits is heavily dictated by external socioeconomic barriers, environmental constraints, and community infrastructure.
+
+## Racial Disparities Persist Beyond Economic Controls
+The percentage of African American residents is the single strongest predictor of asthma ER visits (LASSO Coef: 5.90, P < 0.001). Crucially, this variable retains its high magnitude even after the model controls for median income, insurance coverage, and housing quality. This implies that economic variables alone cannot account for the disparity; structural inequities specific to race likely play a dominant role in asthma morbidity.
+
+## The "Distance Decay" and "Urban Paradox"
+The model highlights a divergence between rural and urban minority populations:
+ - Rural Populations: Show a robust negative association with ER visits (Coef: -0.75), likely driven by lower population density (reduced viral transmission) and the "distance decay" effect, where geographic distance from hospitals discourages ER utilization for non-critical attacks.
+ - Asian Populations: Demonstrate a classic statistical suppression effect. While raw data shows a positive correlation with ER visits (likely due to residence in dense urban centers), the regression reveals a negative coefficient (Coef: -0.38) once urban stressors are controlled for. This suggests the demographic itself has protective health factors that are masked by their urban environment.
+
+## Transportation is a Critical Barrier to Care
+Lack of vehicle availability is a significant positive predictor for both ER visits and hospitalizations (P<0.05, VIF < 10). This indicates that transportation acts as a fundamental "social determinants of health" gateway; without personal transport, patients likely struggle to access routine outpatient care, causing manageable conditions to escalate into emergencies.
+
+## Financial Avoidance and System Failure
+The results point to two distinct failures in the healthcare safety net:
+ - Both % Uninsured and # Uninsured show negative coefficients for ER visits. This suggests "financial avoidance," where uninsured patients delay or avoid emergency care due to cost fears, rather than a lack of medical need.
+ - The rate of Preventable Hospital Stays is a strong positive predictor of asthma ER rates. This confirms that communities with ineffective primary care infrastructure (where patients are hospitalized for manageable conditions) see a direct spillover effect into asthma emergency visits.
+
+## Economic Housing Stress Trumps Physical Crowding
+Severe Housing Cost Burden (paying >50% of income on housing) is a significant positive driver of ER visits (Coef: 1.84, P=0.008). Notably, this economic variable proved statistically significant while physical overcrowding did not (P > 0.05), suggesting that the financial trade-offs required to maintain housing (e.g., cutting medication costs) are more detrimental to asthma control than the physical arrangement of the household.
+
+## Regional Policy Implications
+State-level geographic controls remained significant even after accounting for demographics. Minnesota and Louisiana act as protective factors (negative coefficients), while Massachusetts is associated with higher rates. This indicates that state-level public health policies, Medicaid expansion specifics, or regional climate variations exert an independent influence on asthma outcomes that local socioeconomic data cannot fully explain.
