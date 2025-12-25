@@ -1,8 +1,8 @@
-# Socioeconomic and Environmental Determinants of Asthma: Asthma Hospitalization and ER Visit Analysis for 2019 Data
+# Socioeconomic and Environmental Determinants of Asthma ER Visits and Hospitalizations (U.S. Counties, 2019)
 
 ## Overview
 
-Asthma is a chronic respiratory track condition that is classified as ambulatory case sensitive. 
+Asthma is a chronic respiratory tract condition that is classified as ambulatory case sensitive. 
 This designation indicates that the vast majority of asthma-related hospitalizations and ER visits are preventable through timely and effective outpatient care.
 Despite the availability of effective treatments, preventable hospitalizations persist, serving as a proxy for failures in outpatient management. The severity of the condition is exacerbated by upstream determinants such as poverty, environmental quality, and healthcare accessibility, transforming a manageable chronic condition into an acute medical emergency.
 This research project serves to investigate the connections between socioeconomic status, environment and housing, access to care and how these factors play into asthma-related ER and hospitalization rates.
@@ -18,10 +18,13 @@ Information from several government agencies and non-profit organizations have b
  - [County Health Rankings & Roadmaps](https://www.countyhealthrankings.org/reports/2019-county-health-rankings-key-findings-report)' 2019 County Health Rankings dataset's 'Ranked Measure Data' and 'Additional Measure Data' tabs
  - [Agency for Toxic Substances and Disease Registry (ATSDR)](https://www.atsdr.cdc.gov/place-health/index.html)'s CDC Social Vulnerability Index for 2018
  - [United States Census Bureau](https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html)'s census tracts for latitude and longitude information
-Additional datasets were cleaned in the initial steps but left out during the analysis.
+Additional datasets were cleaned in the initial steps but left out during the analysis due to redundancy.
 
 ## Key Findings
-
+ - Socioeconomic and housing stressors explain more variance in asthma ER visits than clinical or environmental factors.
+ - Racial disparities in ER utilization persist and are very significant even after controlling for income, insurance, and housing.
+ - Transportation access is a major predictor of both ER visits and hospitalizations.
+ - State-level effects suggest policy and regional context matter beyond county characteristics.
 
 ## Methodology
 
@@ -47,7 +50,7 @@ All the state and county name columns were normalized into 'State' and 'County' 
 
 Before the statistical analysis, missing entries needed to be handled. As this project included datasets from numerous sources, the intersection of counties with no missing features was very limited. All the cleaned dataframes from the previous step were loaded and joined onto the dataframe containing asthma-related data, dropping counties that don't have any information for either of the asthma-related metrics. The end result was 1614 counties (or equivalent units) out of 3240 that had measurements for either ER visits or hospitalizations, 1512 counties with ER visit rate data, 1096 counties with hospitalization data, and 1037 counties with data for both at once. For the independent datasets, a simple collinearity test was performed to drop features with correlation coefficients over 0.98, resulting in a total of 47 features dropped. Most notably, 17 out of 30 features were removed from the '5yr_demographic' dataframe, and 27 out of 120 features were dropped from the 'svi_2018' dataframe.
 
-Afterwards, all the datasets were combined into a single dataframe to host the remaining 352 features. After this merging, features that were missing from at least 30% of the counties were removed, leaving 281 features. The asthma-related hospitalization and ER visit were then excluded, and the remaining features were imputed using the 5 nearest neighbors (KNN) for measures that are likely to be impacted by state-level laws, and multiple imputation by chained equations (MICE) for other features. To ensure location data still influenced the MICE model, the state information was encoded into dummies, and the latitude/longitude information from the USCB's gazetteer files was used. To identify the 'hard constraint' features to fill in with KNN imputing, a function was defined to select columns containing the following keywords:
+Afterwards, all the datasets were combined into a single dataframe to host the remaining 352 features. After this merging, features that were missing from at least 30% of the counties were removed, leaving 281 features. The asthma-related hospitalization and ER visit were then excluded, and the remaining features were imputed using the 5 nearest neighbors (KNN) for measures that are likely to be impacted by state-level laws by isolating the counties into state groups to prevent nearby counties from other states affecting the imputing, and multiple imputation by chained equations (MICE) for features that are not as likely to be impacted by state-level laws. To ensure location data still influenced the MICE model, the state information was encoded into dummies, and the latitude/longitude information from the USCB's gazetteer file was used. To identify the 'hard constraint' features to fill in with KNN imputing, a function was defined to select columns containing the following keywords:
 
  - Health policy-related features:  'medicaid', 'insurance', 'enrollment', 'medicare'
  - Fiscal policy-related features:  'tax', 'spending', 'funding'
@@ -71,7 +74,10 @@ In the next step, the existing features were separated into groups based on the 
 
 ### Statistical Analysis
 
-The 'Asthma' category's features only included the hospitalization and ER visit rates, and their correlation coefficients to the entries in the other categories were then calculated. Using the scikit-learn and statsmodel Python packages, the LASSO model was used to select statistically relevant features from the other categories, leaving us with 84 features for ER visit rates and 33 features for hospitalization rates. For these features, the variance inflation factors and p-values were calculated to spot significant relationships. The results that have a p-value less than 0.05 and a variance inflation factor less than 10 in the order of highest absolute OLS coefficient are as follows, with the full tables available under the project files.
+The 'Asthma' category's features only included the hospitalization and ER visit rates, and their correlation coefficients to the entries in the other categories were then calculated. 
+Feature selection was performed using LASSO regression with 5-fold cross‑validated penalty selection, leaving us with 84 features for ER visit rates and 33 features for hospitalization rates. All predictors were standardized prior to modeling. The optimal regularization parameter was chosen to minimize cross‑validated mean squared error. Selected predictors were subsequently refit using ordinary least squares to obtain unpenalized coefficient estimates, confidence intervals, and p‑values. Variance inflation factors were computed to assess residual multicollinearity. The results that have a p-value less than 0.05 and a variance inflation factor less than 10 in the order of highest absolute OLS coefficient are as follows, with the full tables available under the project files.
+
+The feature names are left with minimal changes from the datasets. The 'estimate MOE' features represent the margin of error for the relevant feature.
 
 ### Age-adjusted ER Visit Rate for Asthma per 10,000 People (Adjusted R^2: 0.6119)
 | Feature                                                                                                                                       |   LASSO_Coef |   OLS_Coef |     P_Value |     VIF |   Correlation |
@@ -150,11 +156,11 @@ The full tables for these scores and the correlation values is available in the 
  - State-level geographic controls remained significant even after accounting for demographics. Minnesota and Louisiana act as protective factors (negative coefficients), while Massachusetts is associated with higher rates. This indicates that state-level public health policies, Medicaid expansion specifics, or regional climate variations exert an independent influence on asthma outcomes that local socioeconomic data cannot fully explain.
 
 ### Limitations
- - This analysis models age-adjusted asthma-related ER visit and hospitalization rates per 10,000 residents rather than outcomes conditional on asthma prevalence. Because county-level asthma diagnosis or prevalence data were not included, the study cannot distinguish whether observed associations reflect higher asthma prevalence, greater disease severity among individuals with asthma, or differences in healthcare utilization and access. As a result, some socioeconomic and environmental variables may appear to increase asthma morbidity when they instead influence care-seeking behavior or underlying case counts.
+ - This analysis models age-adjusted asthma-related ER visit and hospitalization rates per 10,000 residents rather than outcomes conditional on asthma prevalence. Because county-level asthma diagnosis or prevalence data were not included, the study cannot distinguish whether observed associations reflect higher asthma prevalence, greater disease severity among individuals with asthma, or differences in healthcare utilization and access. Lower observed utilization in certain populations, including uninsured or rural communities, may therefore indicate underuse of services rather than lower asthma morbidity. State-level effects capture broad regional context but may mask substantial within-state heterogeneity in healthcare policy, infrastructure, and environmental conditions. As a result, some socioeconomic and environmental variables may appear to increase asthma morbidity when they instead influence care-seeking behavior or underlying case counts.
 
  - All variables are measured at the county level, introducing the possibility of ecological fallacy. Population-level associations may not hold at the individual level, and unmeasured individual characteristics such as asthma severity, medication adherence, household smoking exposure, and occupational or school-based triggers may confound the observed relationships. In addition, the cross-sectional design limits causal inference and does not allow for assessment of temporal relationships or disease progression.
 
  - Several environmental pollutant variables exhibit substantial multicollinearity, reflecting their close association with urban density and traffic-related exposures. Although LASSO regularization reduces overfitting, it may obscure or redistribute effects among correlated predictors, making it difficult to isolate the independent contribution of specific pollutants. Consequently, nonsignificant or counterintuitive pollutant coefficients should not be interpreted as evidence of no environmental effect on asthma morbidity.
 
- - Finally, emergency department visits and hospitalizations reflect healthcare utilization rather than disease burden alone. Factors such as insurance coverage, transportation access, geographic proximity to hospitals, and cultural norms influence whether individuals seek emergency care. Lower observed utilization in certain populations, including uninsured or rural communities, may therefore indicate underuse of services rather than lower asthma morbidity. State-level effects capture broad regional context but may mask substantial within-state heterogeneity in healthcare policy, infrastructure, and environmental conditions.
+ - While spatial information (latitude, longitude, and state indicators) was included to control for regional structure, cross‑validation was performed using random folds. As a result, predictive performance may be optimistic in the presence of spatial autocorrelation, and findings should be interpreted as descriptive associations rather than fully spatially generalizable effects
 
