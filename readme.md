@@ -1,4 +1,4 @@
-# Asthma Hospitalization and ER Visit Analysis for 2019 Data
+# Socioeconomic and Environmental Determinants of Asthma: Asthma Hospitalization and ER Visit Analysis for 2019 Data
 
 ## Overview
 
@@ -131,27 +131,30 @@ The full tables for these scores and the correlation values is available in the 
 
 ### Conclusions
 
-## Socioeconomic Determinants Outweigh Clinical Factors for ER Utilization
-The model explains significantly more variance in ER visit rates (Adjusted R^2 : 0.612) than in hospitalization rates (Adjusted R^2 : 0.452). This suggests that while hospitalization may be driven by individual disease progression, the frequency of ER visits is heavily dictated by external socioeconomic barriers, environmental constraints, and community infrastructure.
+ - Socioeconomic determinants outweigh clinical factors for ER utilization. The model explains significantly more variance in ER visit rates (Adjusted R^2 : 0.612) than in hospitalization rates (Adjusted R^2 : 0.452). This suggests that while hospitalization may be driven by individual disease progression, the frequency of ER visits is heavily dictated by external socioeconomic barriers, environmental constraints, and community infrastructure.
 
-## Racial Disparities Persist Beyond Economic Controls
-The percentage of African American residents is the single strongest predictor of asthma ER visits (LASSO Coef: 5.90, P < 0.001). Crucially, this variable retains its high magnitude even after the model controls for median income, insurance coverage, and housing quality. This implies that economic variables alone cannot account for the disparity; structural inequities specific to race likely play a dominant role in asthma morbidity.
+ - Racial disparities persist beyond economic controls. The percentage of African American residents is the single strongest predictor of asthma ER visits (LASSO Coef: 5.90, P < 0.001). Crucially, this variable retains its high magnitude even after the model controls for median income, insurance coverage, and housing quality. This implies that economic variables alone cannot account for the disparity; structural inequities specific to race likely play a dominant role in asthma morbidity.
 
-## The "Distance Decay" and "Urban Paradox"
-The model highlights a divergence between rural and urban minority populations:
- - Rural Populations: Show a robust negative association with ER visits (Coef: -0.75), likely driven by lower population density (reduced viral transmission) and the "distance decay" effect, where geographic distance from hospitals discourages ER utilization for non-critical attacks.
- - Asian Populations: Demonstrate a classic statistical suppression effect. While raw data shows a positive correlation with ER visits (likely due to residence in dense urban centers), the regression reveals a negative coefficient (Coef: -0.38) once urban stressors are controlled for. This suggests the demographic itself has protective health factors that are masked by their urban environment.
+ - The model highlights a divergence between rural and urban minority populations:
+   - Rural Populations: Show a robust negative association with ER visits (Coef: -0.75), likely driven by lower population density (reduced viral transmission) and the "distance decay" effect, where geographic distance from hospitals discourages ER utilization for non-critical attacks.
+   - Asian Populations: Demonstrate a classic statistical suppression effect. While raw data shows a positive correlation with ER visits (likely due to residence in dense urban centers), the regression reveals a negative coefficient (Coef: -0.38) once urban stressors are controlled for. This suggests the demographic itself has protective health factors that are masked by their urban environment.
 
-## Transportation is a Critical Barrier to Care
-Lack of vehicle availability is a significant positive predictor for both ER visits and hospitalizations (P<0.05, VIF < 10). This indicates that transportation acts as a fundamental "social determinants of health" gateway; without personal transport, patients likely struggle to access routine outpatient care, causing manageable conditions to escalate into emergencies.
+ - Transportation is a critical barrier to care. Lack of vehicle availability is a significant positive predictor for both ER visits and hospitalizations (P<0.05, VIF < 10). This indicates that transportation acts as a fundamental "social determinants of health" gateway; without personal transport, patients likely struggle to access routine outpatient care, causing manageable conditions to escalate into emergencies.
 
-## Financial Avoidance and System Failure
-The results point to two distinct failures in the healthcare safety net:
- - Both % Uninsured and # Uninsured show negative coefficients for ER visits. This suggests "financial avoidance," where uninsured patients delay or avoid emergency care due to cost fears, rather than a lack of medical need.
- - The rate of Preventable Hospital Stays is a strong positive predictor of asthma ER rates. This confirms that communities with ineffective primary care infrastructure (where patients are hospitalized for manageable conditions) see a direct spillover effect into asthma emergency visits.
+ - The results point to two distinct failures in the healthcare safety net:
+   - Both % Uninsured and # Uninsured show negative coefficients for ER visits. This suggests "financial avoidance," where uninsured patients delay or avoid emergency care due to cost fears, rather than a lack of medical need.
+   - The rate of Preventable Hospital Stays is a strong positive predictor of asthma ER rates. This confirms that communities with ineffective primary care infrastructure (where patients are hospitalized for manageable conditions) see a direct spillover effect into asthma emergency visits.
 
-## Economic Housing Stress Trumps Physical Crowding
-Severe Housing Cost Burden (paying >50% of income on housing) is a significant positive driver of ER visits (Coef: 1.84, P=0.008). Notably, this economic variable proved statistically significant while physical overcrowding did not (P > 0.05), suggesting that the financial trade-offs required to maintain housing (e.g., cutting medication costs) are more detrimental to asthma control than the physical arrangement of the household.
+ - Economic housing stress trumps physical crowding. Severe Housing Cost Burden (paying >50% of income on housing) is a significant positive driver of ER visits (Coef: 1.84, P=0.008). Notably, this economic variable proved statistically significant while physical overcrowding did not (P > 0.05), suggesting that the financial trade-offs required to maintain housing (e.g., cutting medication costs) are more detrimental to asthma control than the physical arrangement of the household.
 
-## Regional Policy Implications
-State-level geographic controls remained significant even after accounting for demographics. Minnesota and Louisiana act as protective factors (negative coefficients), while Massachusetts is associated with higher rates. This indicates that state-level public health policies, Medicaid expansion specifics, or regional climate variations exert an independent influence on asthma outcomes that local socioeconomic data cannot fully explain.
+ - State-level geographic controls remained significant even after accounting for demographics. Minnesota and Louisiana act as protective factors (negative coefficients), while Massachusetts is associated with higher rates. This indicates that state-level public health policies, Medicaid expansion specifics, or regional climate variations exert an independent influence on asthma outcomes that local socioeconomic data cannot fully explain.
+
+### Limitations
+ - This analysis models age-adjusted asthma-related ER visit and hospitalization rates per 10,000 residents rather than outcomes conditional on asthma prevalence. Because county-level asthma diagnosis or prevalence data were not included, the study cannot distinguish whether observed associations reflect higher asthma prevalence, greater disease severity among individuals with asthma, or differences in healthcare utilization and access. As a result, some socioeconomic and environmental variables may appear to increase asthma morbidity when they instead influence care-seeking behavior or underlying case counts.
+
+ - All variables are measured at the county level, introducing the possibility of ecological fallacy. Population-level associations may not hold at the individual level, and unmeasured individual characteristics such as asthma severity, medication adherence, household smoking exposure, and occupational or school-based triggers may confound the observed relationships. In addition, the cross-sectional design limits causal inference and does not allow for assessment of temporal relationships or disease progression.
+
+ - Several environmental pollutant variables exhibit substantial multicollinearity, reflecting their close association with urban density and traffic-related exposures. Although LASSO regularization reduces overfitting, it may obscure or redistribute effects among correlated predictors, making it difficult to isolate the independent contribution of specific pollutants. Consequently, nonsignificant or counterintuitive pollutant coefficients should not be interpreted as evidence of no environmental effect on asthma morbidity.
+
+ - Finally, emergency department visits and hospitalizations reflect healthcare utilization rather than disease burden alone. Factors such as insurance coverage, transportation access, geographic proximity to hospitals, and cultural norms influence whether individuals seek emergency care. Lower observed utilization in certain populations, including uninsured or rural communities, may therefore indicate underuse of services rather than lower asthma morbidity. State-level effects capture broad regional context but may mask substantial within-state heterogeneity in healthcare policy, infrastructure, and environmental conditions.
+
