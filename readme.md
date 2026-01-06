@@ -24,7 +24,6 @@ Additional datasets were cleaned in the initial steps but left out during the an
  - Socioeconomic and housing stressors explain more variance in asthma ER visits than clinical or environmental factors.
  - Racial disparities in ER utilization persist and are very significant even after controlling for income, insurance, and housing.
  - Transportation access is a major predictor of both ER visits and hospitalizations.
- - State-level effects suggest policy and regional context matter beyond county characteristics.
 
 ## Methodology
 
@@ -79,67 +78,63 @@ Feature selection was performed using LASSO regression with 5-fold cross‑valid
 
 The feature names are left with minimal changes from the datasets. The 'estimate MOE' features represent the margin of error for the relevant feature.
 
-### Age-adjusted ER Visit Rate for Asthma per 10,000 People (Adjusted R^2: 0.6119)
+### Age-adjusted ER Visit Rate for Asthma per 10,000 People (Adjusted R^2: 0.5942)
 | Feature                                                                                                                                       |   LASSO_Coef |   OLS_Coef |     P_Value |     VIF |   Correlation |
 |:----------------------------------------------------------------------------------------------------------------------------------------------|-------------:|-----------:|------------:|--------:|--------------:|
-| Demographics => % African American                                                                                                            |     5.90747  |   6.45041  | 2.59575e-10 | 9.88461 |    0.535384   |
-| (Household Composition/Disability) Percentage of persons aged 17 and younger estimate MOE, 2014-2018 ACS 2018 DESCRIPTION [MP_AGE17]          |    -2.44867  |  -3.33277  | 8.21575e-10 | 2.79834 |   -0.18977    |
-| Median household income => Household Income                                                                                                   |    -2.02376  |  -3.1244   | 0.000781937 | 8.29551 |   -0.139338   |
-| (Minority Status/Language) Sum of series for Minority Status/Languag e theme 2018 DESCRIPTION [SPL_THEME3]                                    |     1.9096   |   2.7612   | 0.000306528 | 5.60711 |    0.37892    |
-| State_Minnesota                                                                                                                               |    -2.38099  |  -2.71482  | 1.07503e-08 | 2.14495 |   -0.19243    |
-| State_Louisiana                                                                                                                               |    -1.96718  |  -2.61273  | 5.19813e-06 | 3.14205 |    0.096494   |
-| Adult smoking => % Smokers                                                                                                                    |    -0.753919 |  -2.54391  | 0.00413937  | 7.55559 |    0.102209   |
-| (Housing Type/Transportation) Percentage of households with no vehicle available estimate [EP_NOVEH]                                          |     2.60954  |   2.43923  | 0.0142162   | 9.50855 |    0.446551   |
-| Income inequality => Income Ratio                                                                                                             |    -1.48532  |  -2.31122  | 9.9615e-05  | 3.37762 |    0.331754   |
-| HIV prevalence => HIV Prevalence Rate                                                                                                         |     2.2755   |   2.16262  | 0.000960942 | 4.1143  |    0.505364   |
-| Life expectancy => Life Expectancy                                                                                                            |    -1.85205  |  -2.07679  | 0.0103308   | 6.29848 |   -0.190332   |
-| Respiratory Therapist per 100,000 population                                                                                                  |    -1.64723  |  -2.05239  | 0.0113422   | 6.31107 |   -0.1518     |
-| Diabetes prevalence => % Diabetic                                                                                                             |     1.28156  |   1.90583  | 0.0146024   | 5.85079 |    0.198298   |
-| Preventable hospital stays => Preventable Hosp. Rate                                                                                          |     1.31357  |   1.86485  | 0.000115683 | 2.24093 |    0.139559   |
-| (General) Adjunct variable - Percentage uninsured in the total civilian noninstitutiona lized population estimate, 2014-2018 ACS [EP_UNINSUR] |    -1.34382  |  -1.8488   | 0.00406763  | 3.97528 |    0.112136   |
-| COVERAGE ALONE OR IN COMBINATION => Direct-purchase insurance alone or in combination => Under 19                                             |     0.903299 |   1.82837  | 3.81424e-05 | 1.88604 |   -0.137047   |
-| State_Massachusetts                                                                                                                           |     1.39874  |   1.76324  | 0.000151883 | 2.07539 |    0.132306   |
-| Demographics => % Asian                                                                                                                       |    -0.382374 |  -1.72936  | 0.0185692   | 5.1852  |    0.139659   |
-| Demographics => % Rural                                                                                                                       |    -0.751175 |  -1.66067  | 0.0195136   | 4.85763 |   -0.291233   |
-| (Socioeconomic) Flag - the percentage of persons with no high school diploma is in the 90th percentile (1 = yes, 0 = no) [F_NOHSDP]           |    -1.24328  |  -1.6356   | 0.000222208 | 1.87997 |    0.0250118  |
-| Severe housing problems => Severe Housing Cost Burden                                                                                         |     1.84245  |   1.62568  | 0.00804503  | 3.61349 |    0.436264   |
-| Sexually transmitted infections => Chlamydia Rate                                                                                             |     0.679757 |   1.59491  | 0.0127527   | 3.93909 |    0.481207   |
-| State_Maine                                                                                                                                   |     1.04729  |   1.52384  | 0.000164743 | 1.56687 |    0.0305938  |
-| (Housing Type/Transportation) Sum of series for Housing Type/ Transportation theme [SPL_THEME4]                                               |    -0.942657 |  -1.47508  | 0.0481629   | 5.35765 |    0.32746    |
-| (Household Composition/Disability) Persons aged 17 and younger estimate MOE, 2014-2018 ACS 2018 DESCRIPTION [M_AGE17]                         |     0.79669  |   1.36236  | 0.000345355 | 1.38888 |    0.0366692  |
-| PRIVATE INSURANCE ALONE OR IN COMBINATION => 75 years and over                                                                                |    -0.158222 |  -1.17822  | 0.0185373   | 2.40554 |   -0.242517   |
-| Violent crime => Violent Crime Rate                                                                                                           |     1.85649  |   1.16682  | 0.0296858   | 2.76785 |    0.534607   |
-| State_Connecticut                                                                                                                             |     0.510532 |   0.800747 | 0.0305838   | 1.31785 |    0.0497299  |
-| State_New Hampshire                                                                                                                           |     0.319998 |   0.7986   | 0.0327562   | 1.34469 |    0.00417388 |
+| Demographics => % African American                                                                                                            |     4.33779  |   5.2423   | 6.12996e-09 | 7.39978 |     0.535384  |
+| (Household Composition/Disability) Percentage of persons aged 17 and younger estimate MOE, 2014-2018 ACS 2018 DESCRIPTION [MP_AGE17]          |    -2.63719  |  -4.04776  | 4.42955e-13 | 2.82442 |    -0.189497  |
+| Value_Pollutant: Formaldehyde                                                                                                                 |    -1.87501  |  -3.56924  | 5.00152e-07 | 4.60202 |     0.300947  |
+| Adult smoking => % Smokers                                                                                                                    |    -1.40226  |  -3.42066  | 7.11681e-05 | 6.78954 |     0.102209  |
+| Life expectancy => Life Expectancy                                                                                                            |    -2.43593  |  -3.21985  | 9.49332e-05 | 6.23202 |    -0.190749  |
+| Median household income => Household Income                                                                                                   |    -1.55918  |  -2.86115  | 0.00114841  | 7.10298 |    -0.139338  |
+| Demographics => % Hispanic                                                                                                                    |     1.80233  |   2.66906  | 0.000222521 | 4.78892 |     0.201783  |
+| (Minority Status/Language) Sum of series for Minority Status/Languag e theme 2018 DESCRIPTION [SPL_THEME3]                                    |     2.29512  |   2.52238  | 0.00117973  | 5.54671 |     0.37892   |
+| Population, All (County Level File)                                                                                                           |     1.73451  |   2.52057  | 4.79627e-07 | 2.28768 |     0.241582  |
+| Severe housing problems => Severe Housing Cost Burden                                                                                         |     2.63243  |   2.4382   | 4.20978e-05 | 3.24383 |     0.436264  |
+| HIV prevalence => HIV Prevalence Rate                                                                                                         |     2.70837  |   2.36988  | 0.000164683 | 3.62432 |     0.500156  |
+| Income inequality => Income Ratio                                                                                                             |    -1.81826  |  -2.34211  | 4.33224e-05 | 3.00297 |     0.331754  |
+| Poor mental health days => Mentally Unhealthy Days                                                                                            |     0.331287 |   2.11991  | 0.0160519   | 7.12252 |     0.274964  |
+| Demographics => % Rural                                                                                                                       |    -0.97217  |  -2.05599  | 0.00604743  | 5.15049 |    -0.291233  |
+| Diabetes prevalence => % Diabetic                                                                                                             |     1.78854  |   2.03553  | 0.0107507   | 5.84984 |     0.198298  |
+| COVERAGE ALONE OR IN COMBINATION => Direct-purchase insurance alone or in combination => Under 19                                             |     1.13037  |   1.94768  | 1.53655e-05 | 1.85638 |    -0.137047  |
+| Violent crime => Violent Crime Rate                                                                                                           |     2.4005   |   1.90545  | 0.000197374 | 2.40085 |     0.533786  |
+| Longitude                                                                                                                                     |     1.54565  |   1.82143  | 0.00124818  | 2.9213  |     0.172522  |
+| (Household Composition/Disability) Persons aged 17 and younger estimate MOE, 2014-2018 ACS 2018 DESCRIPTION [M_AGE17]                         |     1.03155  |   1.70086  | 9.42872e-06 | 1.348   |     0.0367946 |
+| (General) Adjunct variable - Percentage uninsured in the total civilian noninstitutiona lized population estimate, 2014-2018 ACS [EP_UNINSUR] |    -0.982217 |  -1.65275  | 0.00415515  | 3.05261 |     0.112076  |
+| Demographics => % Asian                                                                                                                       |    -0.430163 |  -1.59945  | 0.0288446   | 4.92228 |     0.139659  |
+| Adult obesity => % Obese                                                                                                                      |     0.8707   |   1.59806  | 0.0175173   | 4.1577  |     0.0522914 |
+| Preventable hospital stays => Preventable Hosp. Rate                                                                                          |     0.545466 |   1.53783  | 0.000742315 | 1.90565 |     0.139013  |
+| Unemployment => % Unemployed                                                                                                                  |    -0.152694 |  -1.49534  | 0.00664706  | 2.78761 |     0.220535  |
+| (Socioeconomic) Flag - the percentage of persons with no high school diploma is in the 90th percentile (1 = yes, 0 = no) [F_NOHSDP]           |    -1.09028  |  -1.29045  | 0.00333881  | 1.77482 |     0.0250129 |
+| Sexually transmitted infections => Chlamydia Rate                                                                                             |     0.4886   |   1.28482  | 0.0422174   | 3.67767 |     0.471192  |
+| Demographics => % American Indian/Alaskan Native                                                                                              |    -0.819692 |  -1.24865  | 0.0128832   | 2.31576 |    -0.026051  |
+| Access to exercise opportunities => % With Access                                                                                             |     0.729189 |   1.2111   | 0.0209073   | 2.52669 |     0.156239  |
+| PRIVATE INSURANCE ALONE OR IN COMBINATION => Below 138 percent of the poverty threshold                                                       |    -0.971177 |  -1.16984  | 0.0367829   | 2.88504 |    -0.299506  |
+| COVERAGE ALONE => Public insurance alone => VA care coverage alone                                                                            |     0.544756 |   0.798997 | 0.0364097   | 1.34049 |     0.0899133 |
 
 
-
-### Age-adjusted Hospitalization Rate for Asthma per 10,000 People (Adjusted R^2: 0.4524)
-| Feature                                                                                                                              |   LASSO_Coef |   OLS_Coef |     P_Value |     VIF |   Correlation |
-|:-------------------------------------------------------------------------------------------------------------------------------------|-------------:|-----------:|------------:|--------:|--------------:|
-| Preventable hospital stays => Preventable Hosp. Rate                                                                                 |   0.414405   |   0.698937 | 8.16587e-14 | 1.88489 |     0.260846  |
-| (Housing Type/Transportation) Percentage of households with no vehicle available estimate [EP_NOVEH]                                 |   0.405624   |   0.429859 | 6.64986e-05 | 2.5469  |     0.44344   |
-| HIV prevalence => HIV Prevalence Rate                                                                                                |   0.277723   |   0.392361 | 0.00055575  | 2.8375  |     0.398091  |
-| State_Minnesota                                                                                                                      |  -0.180722   |  -0.383413 | 1.75705e-05 | 1.74631 |    -0.173672  |
-| Low birthweight => % LBW                                                                                                             |   0.0574876  |   0.377285 | 0.000279847 | 2.3674  |     0.237602  |
-| Demographics => % Hispanic                                                                                                           |   0.116857   |   0.364236 | 0.00110092  | 2.73831 |     0.19989   |
-| High school graduation => Graduation Rate                                                                                            |  -0.139854   |  -0.357841 | 5.16935e-05 | 1.71322 |    -0.260989  |
-| State_Louisiana                                                                                                                      |  -0.0753757  |  -0.336877 | 1.70954e-05 | 1.34429 |     0.0217947 |
-| State_Missouri                                                                                                                       |   0.0845323  |   0.327851 | 1.27768e-05 | 1.23577 |     0.0620509 |
-| (Household Composition/Disability) Percentage of persons aged 17 and younger estimate MOE, 2014-2018 ACS 2018 DESCRIPTION [MP_AGE17] |  -0.175769   |  -0.299473 | 0.037934    | 4.58979 |    -0.259581  |
-| State_Kansas                                                                                                                         |   0.0464431  |   0.292978 | 0.000277489 | 1.42587 |    -0.0221605 |
-| COVERAGE ALONE OR IN COMBINATION => Employer-based insurance alone or in combination => 65 years and over                            |   0.0570474  |   0.216632 | 0.0246221   | 2.048   |     0.232214  |
-| Longitude                                                                                                                            |   0.090324   |   0.206533 | 0.0386515   | 2.19931 |     0.225984  |
-| State_Massachusetts                                                                                                                  |   0.00227979 |   0.143542 | 0.0441842   | 1.12192 |     0.114854  |
+### Age-adjusted Hospitalization Rate for Asthma per 10,000 People (Adjusted R^2: 0.4125)
+| Feature                                                                                                   |   LASSO_Coef |   OLS_Coef |     P_Value |     VIF |   Correlation |
+|:----------------------------------------------------------------------------------------------------------|-------------:|-----------:|------------:|--------:|--------------:|
+| Preventable hospital stays => Preventable Hosp. Rate                                                      |    0.331111  |   0.546102 | 5.82658e-10 | 1.57173 |      0.260481 |
+| Demographics => % Hispanic                                                                                |    0.105494  |   0.417186 | 1.6335e-05  | 1.91286 |      0.19989  |
+| HIV prevalence => HIV Prevalence Rate                                                                     |    0.243806  |   0.394293 | 0.0006227   | 2.71985 |      0.390014 |
+| (Housing Type/Transportation) Percentage of households with no vehicle available estimate [EP_NOVEH]      |    0.381568  |   0.368779 | 0.000789865 | 2.4731  |      0.443439 |
+| Poor mental health days => Mentally Unhealthy Days                                                        |    0.0477193 |   0.362052 | 0.00353402  | 3.15981 |      0.290828 |
+| Drug overdose deaths => # Drug Overdose Deaths                                                            |    0.306322  |   0.341133 | 0.000615188 | 2.03195 |      0.401212 |
+| Longitude                                                                                                 |    0.0795509 |   0.29727  | 0.002921    | 2.04635 |      0.226687 |
+| COVERAGE ALONE OR IN COMBINATION => Employer-based insurance alone or in combination => 65 years and over |    0.0370125 |   0.215301 | 0.0293835   | 2.00732 |      0.232214 |
+| High school graduation => Graduation Rate                                                                 |   -0.0902439 |  -0.205585 | 0.0185363   | 1.56566 |     -0.26099  |
+| Violent crime => Violent Crime Rate                                                                       |    0.240157  |   0.205062 | 0.0332489   | 1.90632 |      0.408334 |
+| COVERAGE ALONE OR IN COMBINATION => Medicare coverage alone or in combination => Under 19                 |    0.0286332 |   0.153922 | 0.033657    | 1.07903 |      0.150341 |
 
 
 The full tables for these scores and the correlation values is available in the files.
 
-### Conclusions
+### Conclusions (table changed, needs adjustment)
+ - Socioeconomic determinants outweigh clinical factors for ER utilization. The model explains significantly more variance in ER visit rates (Adjusted R^2 : 0.594) than in hospitalization rates (Adjusted R^2 : 0.413). This suggests that while hospitalization may be driven by individual disease progression, the frequency of ER visits is heavily dictated by external socioeconomic barriers, environmental constraints, and infrastructure.
 
- - Socioeconomic determinants outweigh clinical factors for ER utilization. The model explains significantly more variance in ER visit rates (Adjusted R^2 : 0.612) than in hospitalization rates (Adjusted R^2 : 0.452). This suggests that while hospitalization may be driven by individual disease progression, the frequency of ER visits is heavily dictated by external socioeconomic barriers, environmental constraints, and community infrastructure.
-
- - Racial disparities persist beyond economic controls. The percentage of African American residents is the single strongest predictor of asthma ER visits (LASSO Coef: 5.90, P < 0.001). Crucially, this variable retains its high magnitude even after the model controls for median income, insurance coverage, and housing quality. This implies that economic variables alone cannot account for the disparity; structural inequities specific to race likely play a dominant role in asthma morbidity.
+ - Racial disparities persist beyond economic controls. The percentage of African American residents is the single strongest predictor of asthma ER visits (LASSO Coef: 4.34, P < 0.001). Crucially, this variable retains its high magnitude even after the model controls for median income, insurance coverage, and housing quality. This implies that economic variables alone cannot account for the disparity; structural inequities specific to race likely play a dominant role in asthma morbidity. Similarly, the percentage of Hispanic residents is a positive predictor for both ER visits (Coef: 1.80) and Hospitalizations (Coef: 0.11), reinforcing the link between minority status and higher asthma burden.
 
  - The model highlights a divergence between rural and urban minority populations:
    - Rural Populations: Show a robust negative association with ER visits (Coef: -0.75), likely driven by lower population density (reduced viral transmission) and the "distance decay" effect, where geographic distance from hospitals discourages ER utilization for non-critical attacks.
@@ -152,8 +147,6 @@ The full tables for these scores and the correlation values is available in the 
    - The rate of Preventable Hospital Stays is a strong positive predictor of asthma ER rates. This confirms that communities with ineffective primary care infrastructure (where patients are hospitalized for manageable conditions) see a direct spillover effect into asthma emergency visits.
 
  - Economic housing stress trumps physical crowding. Severe Housing Cost Burden (paying >50% of income on housing) is a significant positive driver of ER visits (Coef: 1.84, P=0.008). Notably, this economic variable proved statistically significant while physical overcrowding did not (P > 0.05), suggesting that the financial trade-offs required to maintain housing (e.g., cutting medication costs) are more detrimental to asthma control than the physical arrangement of the household.
-
- - State-level geographic controls remained significant even after accounting for demographics. Minnesota and Louisiana act as protective factors (negative coefficients), while Massachusetts is associated with higher rates. This indicates that state-level public health policies, Medicaid expansion specifics, or regional climate variations exert an independent influence on asthma outcomes that local socioeconomic data cannot fully explain.
 
 ### Limitations
  - This analysis models age-adjusted asthma-related ER visit and hospitalization rates per 10,000 residents rather than outcomes conditional on asthma prevalence. Because county-level asthma diagnosis or prevalence data were not included, the study cannot distinguish whether observed associations reflect higher asthma prevalence, greater disease severity among individuals with asthma, or differences in healthcare utilization and access. Lower observed utilization in certain populations, including uninsured or rural communities, may therefore indicate underuse of services rather than lower asthma morbidity. State-level effects capture broad regional context but may mask substantial within-state heterogeneity in healthcare policy, infrastructure, and environmental conditions. As a result, some socioeconomic and environmental variables may appear to increase asthma morbidity when they instead influence care-seeking behavior or underlying case counts.
