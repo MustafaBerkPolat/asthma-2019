@@ -132,7 +132,7 @@ The feature names are left with minimal changes from the datasets. The 'estimate
 
 The full tables for these scores and the correlation values is available in the files.
 
-### Conclusions (table changed, needs adjustment)
+### Conclusions
  - Socioeconomic determinants outweigh clinical factors for ER utilization. The model explains significantly more variance in ER visit rates (Adjusted R^2 : 0.594) than in hospitalization rates (Adjusted R^2 : 0.413). This suggests that while hospitalization may be driven by individual disease progression, the frequency of ER visits is heavily dictated by external socioeconomic barriers, environmental constraints, and community infrastructure.
 
  - Racial disparities persist beyond economic controls. The percentage of African American residents is the single strongest predictor of asthma ER visits (OLS Coef: 5.24, p < 0.001). Crucially, this variable retains its high magnitude even after the model controls for median income, insurance coverage, and housing quality. This implies that economic variables alone cannot account for the disparity; structural inequities specific to race likely play a dominant role in asthma morbidity. Similarly, the percentage of Hispanic residents is a robust positive predictor for both ER visits (OLS Coef: 2.67) and hospitalization rates (OLS Coef: 0.42). This suggests that even when controlling for wealth and geography, structural factors specific to minority communities drive emergency asthma care.
