@@ -12,12 +12,12 @@ This research project serves to investigate the connections between socioeconomi
 Information from several government agencies and non-profit organizations have been used during this project:
  - [American Community Survey (ACS)](https://www.census.gov/programs-surveys/acs.html)"s 5 year estimate private and public health insurance coverage and estimate population by age, gender and dependency per county 
 (codes ACSST5Y2019.S2703, ACSST5Y2019.S2704 and ACSST5Y2019.S0101)
- - [Environmental Protection Agency (EPA)](https://www.epa.gov/)"s national-scale air toxic assesments (051646 on the [EPH](https://ephtracking.cdc.gov/DataExplorer/?c=11&i=81&m=-1) system)
- - [Centers for Disease Control and Prevention (CDC)](https://www.cdc.gov/index.html)"s age-adjusted ER visits and hospitalizations for asthma per 10,000 population (051823 and 053054 respectively on the EPH system)
- - [HRSA Data Warehouse](https://data.hrsa.gov/topics/health-workforce/nchwa/ahrf)"s active medical doctor and respiratory therapist estimations per state, from AMA Physician Professional Data 2019
- - [County Health Rankings & Roadmaps](https://www.countyhealthrankings.org/reports/2019-county-health-rankings-key-findings-report)" 2019 County Health Rankings dataset"s "Ranked Measure Data" and "Additional Measure Data" tabs
- - [Agency for Toxic Substances and Disease Registry (ATSDR)](https://www.atsdr.cdc.gov/place-health/index.html)"s CDC Social Vulnerability Index for 2018
- - [United States Census Bureau](https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.2020.html#list-tab-790442341)"s shapefiles for county border shape and location information.
+ - [Environmental Protection Agency (EPA)](https://www.epa.gov/)'s national-scale air toxic assesments (051646 on the [EPH](https://ephtracking.cdc.gov/DataExplorer/?c=11&i=81&m=-1) system)
+ - [Centers for Disease Control and Prevention (CDC)](https://www.cdc.gov/index.html)'s age-adjusted ER visits and hospitalizations for asthma per 10,000 population (051823 and 053054 respectively on the EPH system)
+ - [HRSA Data Warehouse](https://data.hrsa.gov/topics/health-workforce/nchwa/ahrf)'s active medical doctor and respiratory therapist estimations per state, from AMA Physician Professional Data 2019
+ - [County Health Rankings & Roadmaps](https://www.countyhealthrankings.org/reports/2019-county-health-rankings-key-findings-report) 2019 County Health Rankings dataset's "Ranked Measure Data" and "Additional Measure Data" tabs
+ - [Agency for Toxic Substances and Disease Registry (ATSDR)](https://www.atsdr.cdc.gov/place-health/index.html)'s CDC Social Vulnerability Index for 2018
+ - [United States Census Bureau](https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.2020.html#list-tab-790442341)'s shapefiles for county border shape and location information.
 Additional datasets were cleaned in the initial steps but left out during the analysis due to redundancy.
 
 ## Key Findings
@@ -31,7 +31,7 @@ Additional datasets were cleaned in the initial steps but left out during the an
 
 ### Data Cleaning and Merging
 
-The different datasets used in this project follow different formatting schemes, so the first step was to clean the data and standardize the format. All the datasets" names were initially manually parsed and renamed for clarity, then loaded into a dictionary of Polars dataframes in Python for the processing. The used datasets as they were downloaded and the names given to them are as follows:
+The different datasets used in this project follow different formatting schemes, so the first step was to clean the data and standardize the format. All the datasets' names were initially manually parsed and renamed for clarity, then loaded into a dictionary of Polars dataframes in Python for the processing. The used datasets as they were downloaded and the names given to them are as follows:
  - 2025_Gaz_counties_national -> "lat_long", to serve as the geographical position data for the imputing of missing measurements later on
  - 5 Year estimate population by age, gender and dependency per county (ACSST5Y2019.S0101) -> "5yr_demographic", for detailed population estimates
  - 5 Year estimate public health insurance coverage (ACSST5Y2019.S2704) ->"5yr_public_insurance", for public insurance coverage data
@@ -54,7 +54,7 @@ Since our target features were limited to the continental US, all data for Hawai
 
 A "hard cutoff list" was defined from features that had keywords such as "insurance" and "education" to differentiate them from smooth features for the purposes of calculating spatial lags and the imputation of missing entries. Features were then filtered based on their coverage of counties with data for our target features separately to ensure that a feature that provides valuable context to the statistical models for one target feature but noise to the other did not affect the second target feature and vice-versa. To accomplish this, two lists containing the names of the features were created to use as filters for the Lasso step.
 
-Moran"s I values for features with over 95% completedness were calculated to identify potential candidates for spatial lagging, identifying 234 features to generate spatial lags for. When calculating the Moran"s I values, features in the hard cutoff list used the constrained weights while "smooth" features like air pollution used the full weights matrix. To ensure the logic was consistent between base and lagged features, the hard cutoff list was expanded to contain the lagged hard cutoff features. Of the initial 52 hard cutoff features, 49 were identified as complete and spatially clustered enough to generate lagged features from. The spatial lags were calculated prior to imputation to provide added context for the imputation algorithm.
+Moran's I values for features with over 95% completedness were calculated to identify potential candidates for spatial lagging, identifying 234 features to generate spatial lags for. When calculating the Moran"s I values, features in the hard cutoff list used the constrained weights while "smooth" features like air pollution used the full weights matrix. To ensure the logic was consistent between base and lagged features, the hard cutoff list was expanded to contain the lagged hard cutoff features. Of the initial 52 hard cutoff features, 49 were identified as complete and spatially clustered enough to generate lagged features from. The spatial lags were calculated prior to imputation to provide added context for the imputation algorithm.
 
 Imputation was done in three passes, where the smooth features were imputed using a random forest regressor, then the spatial lags were recalculated for these now complete features. In the second pass, features in the hard cutoff list were imputed on a state basis, fragmenting the dataframe into one individual dataframe for each state to ensure other states" counties did not affect the algorithm. Counties with less than 5 in-state neighbors were deemed to not have enough context to be imputed this way, and in the final pass these counties were imputed using the full country data for context.
 
